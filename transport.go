@@ -5,6 +5,7 @@ import (
 	"time"
 )
 
+// NewTransport returns a *http.Transport that uses the given resolver while dialing.
 func NewTransport(r Resolver) *http.Transport {
 	return &http.Transport{
 		Proxy: http.ProxyFromEnvironment,

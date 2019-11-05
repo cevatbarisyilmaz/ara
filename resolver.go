@@ -18,9 +18,9 @@ type resolver struct {
 // to given host/ip mappings on lookups.
 //
 // If a host is not part of the given mapping, it will use the
-// net.DefaultResolver
+// net.DefaultResolver.
 //
-// hosts is a map of addresses for a host name, like map[host][]address
+// hosts is a map of addresses for a host name, like map[host][]address.
 func NewCustomResolver(hosts map[string][]string) Resolver {
 	return &resolver{
 		hosts: hosts,
