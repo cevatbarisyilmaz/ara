@@ -13,12 +13,15 @@ you can get `httpClient.Get("http://google.com")` to connect the `localhost`.
 ## Example
 
 ```go
-server := &http.Server{Addr: "127.0.0.1:80", Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-    _, err := w.Write([]byte("Alo?"))
-    if err != nil {
-        log.Fatal(err)
-    }
-})}
+server := &http.Server{
+    Addr: "127.0.0.1:80",
+    Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        _, err := w.Write([]byte("Alo?"))
+        if err != nil {
+            log.Fatal(err)
+        }
+    })
+}
 go func() {
     _ = server.ListenAndServe()
 }()
