@@ -13,15 +13,20 @@ you can get `httpClient.Get("http://google.com")` to connect the `localhost`.
 ## Example
 
 ```go
-sm := http.NewServeMux()
-sm.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-  _, err := w.Write([]byte("Alo?"))
-  if err != nil {
-    log.Fatal(err)
-  }
-})
+server := &http.Server{Addr: "127.0.0.1:80", Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+    _, err := w.Write([]byte("Alo?"))
+    if err != nil {
+        log.Fatal(err)
+    }
+})}
 go func() {
-  log.Fatal(http.ListenAndServe("127.0.0.1:80", sm))
+    _ = server.ListenAndServe()
+}()
+defer func() {
+    err := server.Shutdown(context.Background())
+    if err != nil {
+        log.Fatal(err)
+    }
 }()
 client := ara.NewClient(ara.NewCustomResolver(map[string][]string{"example.com": {"127.0.0.1"}}))
 res, _ := client.Get("http://example.com")
