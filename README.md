@@ -21,10 +21,7 @@ sm.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
   }
 })
 go func() {
-  err := http.ListenAndServe("127.0.0.1:80", sm)
-  if err != nil {
-    log.Fatal(err)
-  }
+  log.Fatal(http.ListenAndServe("127.0.0.1:80", sm))
 }()
 client := ara.NewClient(ara.NewCustomResolver(map[string][]string{"example.com": {"127.0.0.1"}}))
 res, _ := client.Get("http://example.com")
