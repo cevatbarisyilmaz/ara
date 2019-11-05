@@ -2,6 +2,7 @@ package ara_test
 
 import (
 	"bytes"
+	"context"
 	"github.com/cevatbarisyilmaz/ara"
 	"io/ioutil"
 	"net"
@@ -12,7 +13,7 @@ import (
 func TestNewClient(t *testing.T) {
 	const testMessage = "Hi!"
 	const host = "example.com"
-	listener, err := net.Listen("tcp", "127.0.0.4:80")
+	listener, err := net.Listen("tcp", "127.0.0.1:80")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -23,10 +24,17 @@ func TestNewClient(t *testing.T) {
 			t.Fatal(err)
 		}
 	})
+	server := &http.Server{Handler: sm}
 	go func() {
-		t.Fatal(http.Serve(listener, sm))
+		_ = server.Serve(listener)
 	}()
-	client := ara.NewClient(ara.NewCustomResolver(map[string][]string{host: {"127.0.0.4"}}))
+	defer func() {
+		err := server.Shutdown(context.Background())
+		if err != nil {
+			t.Fatal(err)
+		}
+	}()
+	client := ara.NewClient(ara.NewCustomResolver(map[string][]string{host: {"127.0.0.1"}}))
 	response, err := client.Get("http://" + host)
 	if err != nil {
 		t.Fatal(err)

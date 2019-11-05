@@ -30,8 +30,15 @@ func ExampleDetailed() {
 			log.Fatal(err)
 		}
 	})
+	server := &http.Server{Handler: sm}
 	go func() {
-		log.Fatal(http.Serve(listener, sm))
+		_ = server.Serve(listener)
+	}()
+	defer func() {
+		err := server.Shutdown(context.Background())
+		if err != nil {
+			log.Fatal(err)
+		}
 	}()
 	r := &resolver{}
 	dialer := &ara.Dialer{

@@ -18,10 +18,17 @@ func ExampleNewClient() {
 			log.Fatal(err)
 		}
 	})
+	server := &http.Server{Addr: "127.0.0.1:80", Handler: sm}
 	go func() {
-		log.Fatal(http.ListenAndServe("127.0.0.5:80", sm))
+		_ = server.ListenAndServe()
 	}()
-	client := ara.NewClient(ara.NewCustomResolver(map[string][]string{"example.com": {"127.0.0.5"}}))
+	defer func() {
+		err := server.Shutdown(context.Background())
+		if err != nil {
+			log.Fatal(err)
+		}
+	}()
+	client := ara.NewClient(ara.NewCustomResolver(map[string][]string{"example.com": {"127.0.0.1"}}))
 	res, _ := client.Get("http://example.com")
 	body, _ := ioutil.ReadAll(res.Body)
 	fmt.Println(string(body))
@@ -36,11 +43,18 @@ func ExampleNewTransport() {
 			log.Fatal(err)
 		}
 	})
+	server := &http.Server{Addr: "127.0.0.1:80", Handler: sm}
 	go func() {
-		log.Fatal(http.ListenAndServe("127.0.0.2:80", sm))
+		_ = server.ListenAndServe()
+	}()
+	defer func() {
+		err := server.Shutdown(context.Background())
+		if err != nil {
+			log.Fatal(err)
+		}
 	}()
 	client := &http.Client{
-		Transport: ara.NewTransport(ara.NewCustomResolver(map[string][]string{"example.com": {"127.0.0.2"}})),
+		Transport: ara.NewTransport(ara.NewCustomResolver(map[string][]string{"example.com": {"127.0.0.1"}})),
 	}
 	res, _ := client.Get("http://example.com")
 	body, _ := ioutil.ReadAll(res.Body)
@@ -50,7 +64,7 @@ func ExampleNewTransport() {
 
 func ExampleDialer() {
 	go func() {
-		listener, err := net.Listen("tcp", "127.0.0.2:1919")
+		listener, err := net.Listen("tcp", "127.0.0.1:1919")
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -66,9 +80,13 @@ func ExampleDialer() {
 		if err != nil {
 			log.Fatal(err)
 		}
+		err = listener.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
 	}()
 	dialer := ara.Dialer{
-		Resolver: ara.NewCustomResolver(map[string][]string{"example.com": {"127.0.0.2"}}),
+		Resolver: ara.NewCustomResolver(map[string][]string{"example.com": {"127.0.0.1"}}),
 	}
 	conn, err := dialer.DialContext(context.Background(), "tcp", "example.com:1919")
 	if err != nil {
