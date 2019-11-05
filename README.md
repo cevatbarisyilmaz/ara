@@ -3,6 +3,7 @@
 [![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/cevatbarisyilmaz/ara?sort=semver)](https://github.com/cevatbarisyilmaz/ara/releases)
 [![GitHub](https://img.shields.io/github/license/cevatbarisyilmaz/ara)](https://github.com/cevatbarisyilmaz/ara/blob/master/LICENSE)
 [![Go Report Card](https://goreportcard.com/badge/github.com/cevatbarisyilmaz/ara)](https://goreportcard.com/report/github.com/cevatbarisyilmaz/ara)
+
 Package ara provides a dialer with customizable resolver.
 
 It can be used with `http.Client` and `http.Transport` to alter host lookups.
