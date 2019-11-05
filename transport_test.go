@@ -17,14 +17,12 @@ func TestNewTransport(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	sm := http.NewServeMux()
-	sm.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
+	server := &http.Server{Handler: http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 		_, err := writer.Write([]byte(testMessage))
 		if err != nil {
 			t.Fatal(err)
 		}
-	})
-	server := &http.Server{Handler: sm}
+	})}
 	go func() {
 		_ = server.Serve(listener)
 	}()

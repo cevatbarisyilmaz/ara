@@ -23,14 +23,12 @@ func ExampleDetailed() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	sm := http.NewServeMux()
-	sm.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	server := &http.Server{Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		_, err := w.Write([]byte(r.URL.Path))
 		if err != nil {
 			log.Fatal(err)
 		}
-	})
-	server := &http.Server{Handler: sm}
+	})}
 	go func() {
 		_ = server.Serve(listener)
 	}()

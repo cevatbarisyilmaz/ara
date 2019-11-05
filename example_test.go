@@ -11,14 +11,12 @@ import (
 )
 
 func ExampleNewClient() {
-	sm := http.NewServeMux()
-	sm.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	server := &http.Server{Addr: "127.0.0.1:80", Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		_, err := w.Write([]byte("Alo?"))
 		if err != nil {
 			log.Fatal(err)
 		}
-	})
-	server := &http.Server{Addr: "127.0.0.1:80", Handler: sm}
+	})}
 	go func() {
 		_ = server.ListenAndServe()
 	}()
@@ -36,14 +34,12 @@ func ExampleNewClient() {
 }
 
 func ExampleNewTransport() {
-	sm := http.NewServeMux()
-	sm.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	server := &http.Server{Addr: "127.0.0.1:80", Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		_, err := w.Write([]byte("Alo?"))
 		if err != nil {
 			log.Fatal(err)
 		}
-	})
-	server := &http.Server{Addr: "127.0.0.1:80", Handler: sm}
+	})}
 	go func() {
 		_ = server.ListenAndServe()
 	}()
