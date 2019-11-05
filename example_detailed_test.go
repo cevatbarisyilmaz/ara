@@ -31,10 +31,7 @@ func ExampleDetailed() {
 		}
 	})
 	go func() {
-		err := http.Serve(listener, sm)
-		if err != nil {
-			log.Fatal(err)
-		}
+		log.Fatal(http.Serve(listener, sm))
 	}()
 	r := &resolver{}
 	dialer := &ara.Dialer{

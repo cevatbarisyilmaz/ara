@@ -24,10 +24,7 @@ func TestNewClient(t *testing.T) {
 		}
 	})
 	go func() {
-		err := http.Serve(listener, sm)
-		if err != nil {
-			t.Fatal(err)
-		}
+		t.Fatal(http.Serve(listener, sm))
 	}()
 	client := ara.NewClient(ara.NewCustomResolver(map[string][]string{host: {"127.0.0.4"}}))
 	response, err := client.Get("http://" + host)

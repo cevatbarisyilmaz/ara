@@ -24,10 +24,7 @@ func TestNewTransport(t *testing.T) {
 		}
 	})
 	go func() {
-		err := http.Serve(listener, sm)
-		if err != nil {
-			t.Fatal(err)
-		}
+		t.Fatal(http.Serve(listener, sm))
 	}()
 	client := http.Client{Transport: ara.NewTransport(ara.NewCustomResolver(map[string][]string{host: {"127.0.0.3"}}))}
 	response, err := client.Get("http://" + host)
