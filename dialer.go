@@ -126,11 +126,11 @@ type Dialer struct {
 // See func net.Dial for a description of the network and address
 // parameters.
 func (d *Dialer) DialContext(ctx context.Context, network, address string) (net.Conn, error) {
-	var addresses []string
 	host, port, err := net.SplitHostPort(address)
 	if err != nil {
 		return nil, err
 	}
+	var addresses []string
 	ip := net.ParseIP(host)
 	if ip != nil {
 		addresses = []string{address}
@@ -156,10 +156,7 @@ func (d *Dialer) DialContext(ctx context.Context, network, address string) (net.
 	} else {
 		c, err = d.dialSerial(ctx, network, primaries)
 	}
-	if err != nil {
-		return nil, err
-	}
-	return c, nil
+	return c, err
 }
 
 func (d *Dialer) resolver() Resolver {
@@ -348,5 +345,5 @@ func partition(addresses []string) (primaries []string, fallbacks []string) {
 // isIPv4 reports whether addr contains an IPv4 address.
 func isIPv4(addr string) bool {
 	tcpAddr, err := net.ResolveTCPAddr("tcp", addr)
-	return err == nil && tcpAddr.IP.To16() == nil
+	return err == nil && tcpAddr.IP.To4() != nil
 }
