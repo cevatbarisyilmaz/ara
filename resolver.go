@@ -52,7 +52,7 @@ func handleClientTrace(t *httptrace.ClientTrace, host string, records []string) 
 
 func (r *resolver) LookupHost(ctx context.Context, host string) ([]string, error) {
 	records := r.hosts[host]
-	if records != nil && len(records) != 0 {
+	if len(records) > 0 {
 		t := httptrace.ContextClientTrace(ctx)
 		if t != nil {
 			handleClientTrace(t, host, records)

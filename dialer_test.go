@@ -15,7 +15,7 @@ func TestDialer(t *testing.T) {
 	go func() {
 		conn, err := listener.Accept()
 		if err != nil {
-			t.Fatal(err)
+			t.Error(err)
 		}
 		err = conn.Close()
 		if err != nil {

@@ -4,21 +4,34 @@ import (
 	"context"
 	"fmt"
 	"github.com/cevatbarisyilmaz/ara"
-	"io/ioutil"
+	"io"
 	"log"
 	"net"
 	"net/http"
+	"strconv"
 )
 
 func ExampleNewClient() {
-	server := &http.Server{Addr: "127.0.0.1:80", Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		_, err := w.Write([]byte("Alo?"))
-		if err != nil {
-			log.Fatal(err)
-		}
-	})}
+	listener, err := net.Listen("tcp", "127.0.0.1:")
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = listener.Close() // free the port for the server
+	if err != nil {
+		log.Fatal(err)
+	}
+	port := listener.Addr().(*net.TCPAddr).Port
+	server := &http.Server{
+		Addr: listener.Addr().String(),
+		Handler: http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+			_, err := writer.Write([]byte("Alo?"))
+			if err != nil {
+				log.Fatal(err)
+			}
+		})}
 	go func() {
-		_ = server.ListenAndServe()
+		err = server.ListenAndServe()
+		log.Println(err)
 	}()
 	defer func() {
 		err := server.Shutdown(context.Background())
@@ -27,20 +40,36 @@ func ExampleNewClient() {
 		}
 	}()
 	client := ara.NewClient(ara.NewCustomResolver(map[string][]string{"example.com": {"127.0.0.1"}}))
-	res, _ := client.Get("http://example.com")
-	body, _ := ioutil.ReadAll(res.Body)
+	defer client.CloseIdleConnections()
+
+	res, err := client.Get("http://example.com:" + strconv.Itoa(port))
+	if err != nil {
+		log.Fatal(err)
+	}
+	body, _ := io.ReadAll(res.Body)
 	fmt.Println(string(body))
 	// Output: Alo?
 }
 
 func ExampleNewTransport() {
-	server := &http.Server{Addr: "127.0.0.1:80", Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		_, err := w.Write([]byte("Alo?"))
-		if err != nil {
-			log.Fatal(err)
-		}
-	})}
+	listener, err := net.Listen("tcp", "127.0.0.1:")
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = listener.Close() // free the port for the server
+	if err != nil {
+		log.Fatal(err)
+	}
+	port := listener.Addr().(*net.TCPAddr).Port
+	var server *http.Server
 	go func() {
+		addr := listener.Addr().String()
+		server = &http.Server{Addr: addr, Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			_, err := w.Write([]byte("Alo?"))
+			if err != nil {
+				log.Fatal(err)
+			}
+		})}
 		_ = server.ListenAndServe()
 	}()
 	defer func() {
@@ -52,18 +81,24 @@ func ExampleNewTransport() {
 	client := &http.Client{
 		Transport: ara.NewTransport(ara.NewCustomResolver(map[string][]string{"example.com": {"127.0.0.1"}})),
 	}
-	res, _ := client.Get("http://example.com")
-	body, _ := ioutil.ReadAll(res.Body)
+	defer client.CloseIdleConnections()
+	res, err := client.Get("http://example.com:" + strconv.Itoa(port))
+	if err != nil {
+		log.Fatal(err)
+	}
+	body, _ := io.ReadAll(res.Body)
 	fmt.Println(string(body))
 	// Output: Alo?
 }
 
 func ExampleDialer() {
+	serverUp := make(chan bool, 1)
 	go func() {
 		listener, err := net.Listen("tcp", "127.0.0.1:1919")
 		if err != nil {
 			log.Fatal(err)
 		}
+		serverUp <- true
 		conn, err := listener.Accept()
 		if err != nil {
 			log.Fatal(err)
@@ -81,6 +116,7 @@ func ExampleDialer() {
 			log.Fatal(err)
 		}
 	}()
+	<-serverUp
 	dialer := ara.Dialer{
 		Resolver: ara.NewCustomResolver(map[string][]string{"example.com": {"127.0.0.1"}}),
 	}
@@ -88,7 +124,7 @@ func ExampleDialer() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	res, err := ioutil.ReadAll(conn)
+	res, err := io.ReadAll(conn)
 	if err != nil {
 		log.Fatal(err)
 	}
