@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/cevatbarisyilmaz/ara"
-	"io/ioutil"
+	"io"
 	"log"
 	"net"
 	"net/http"
@@ -18,8 +18,8 @@ func (r resolver) LookupHost(ctx context.Context, host string) ([]string, error)
 	return []string{"127.0.0.1"}, nil
 }
 
-func ExampleDetailed() {
-	listener, err := net.Listen("tcp", "127.0.0.1:0")
+func Example() {
+	listener, err := net.Listen("tcp", "127.0.0.1:")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -54,6 +54,7 @@ func ExampleDetailed() {
 		Transport: transport,
 		Timeout:   time.Minute,
 	}
+	defer client.CloseIdleConnections()
 	_, port, err := net.SplitHostPort(listener.Addr().String())
 	if err != nil {
 		log.Fatal(err)
@@ -62,7 +63,7 @@ func ExampleDetailed() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	body, err := ioutil.ReadAll(res.Body)
+	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		log.Fatal(err)
 	}

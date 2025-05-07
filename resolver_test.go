@@ -55,7 +55,10 @@ func TestClientTrace(t *testing.T) {
 		},
 	})
 
-	resolver.LookupHost(ctx, "example.com")
+	_, err := resolver.LookupHost(ctx, "example.com")
+	if err != nil {
+		t.Error(err)
+	}
 
 	if !gotDNSStart {
 		t.Error("ClientTrace.DNSStart not called")

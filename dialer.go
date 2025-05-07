@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net"
+	"sync"
 	"syscall"
 	"time"
 )
@@ -104,7 +105,8 @@ type Dialer struct {
 	Control func(network, address string, c syscall.RawConn) error
 
 	// Underlying dialer
-	d *net.Dialer
+	mu       sync.Mutex
+	myDialer *net.Dialer // GUARDED_BY(mu)
 }
 
 // DialContext connects to the address on the named network using
@@ -289,10 +291,12 @@ func (d *Dialer) fallbackDelay() time.Duration {
 }
 
 func (d *Dialer) dialer() *net.Dialer {
-	if d.d != nil {
-		return d.d
+	d.mu.Lock()
+	defer d.mu.Unlock()
+	if d.myDialer != nil {
+		return d.myDialer
 	}
-	d.d = &net.Dialer{
+	d.myDialer = &net.Dialer{
 		Timeout:       d.Timeout,
 		Deadline:      d.Deadline,
 		LocalAddr:     d.LocalAddr,
@@ -300,7 +304,7 @@ func (d *Dialer) dialer() *net.Dialer {
 		KeepAlive:     d.KeepAlive,
 		Control:       d.Control,
 	}
-	return d.d
+	return d.myDialer
 }
 
 // partialDeadline returns the deadline to use for a single address,

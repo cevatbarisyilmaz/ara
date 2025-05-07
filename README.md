@@ -22,7 +22,7 @@ server := &http.Server{
 go server.ListenAndServe()
 client := ara.NewClient(ara.NewCustomResolver(map[string][]string{"example.com": {"127.0.0.1"}}))
 res, _ := client.Get("http://example.com")
-body, _ := ioutil.ReadAll(res.Body)
+body, _ := io.ReadAll(res.Body)
 fmt.Println(string(body))
 // Output: Alo?
 ```
